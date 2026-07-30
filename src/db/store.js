@@ -23,6 +23,19 @@ function defaultData() {
         sponsor: { title: "Sponsor", body: "Belum ada konten." },
       },
       rules: "Aturan belum diatur oleh owner.",
+      home: {
+        eyebrow: "Talent Hansel",
+        title: "Talent produk, siap untuk brand-mu.",
+        subtitle:
+          "Jelajahi katalog talent kami, pilih paket yang sesuai, dan ajukan order langsung ke tim kami.",
+        tag: "Order terstruktur, respons cepat",
+        sectionTitle: "Jelajahi",
+        links: {
+          talent: { label: "Katalog Talent", sub: "Foto, deskripsi, dan paket harga" },
+          info: { label: "Info & Promo", sub: "Channel, grup, sponsor" },
+          rules: { label: "Aturan Order", sub: "Ketentuan yang perlu kamu tahu" },
+        },
+      },
       pageBackgrounds: {
         home: { type: "color", value: "#f5f1e6" },
         talent: { type: "color", value: "#f5f1e6" },
