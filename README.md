@@ -4,12 +4,12 @@ Bot Telegram + Mini App untuk agensi talent model produk:
 
 - **Live chat relay** — pesan pengguna diteruskan ke grup admin (gaya Livegram); admin membalas dengan reply, dan bisa mengakhiri sesi lewat tombol.
 - **Mini App** (Telegram Web App) — halaman Beranda, Katalog Talent (kartu ala polaroid, deskripsi, **paket harga**, bukan harga per-orang untuk chat langsung), Info & Promo, dan Aturan.
-- **Booking terstruktur** — tombol booking pada halaman talent membuka **form** (brand, jenis produk, tanggal shoot, budget, kebutuhan) yang dikirim ke grup admin sebagai pesan terstruktur — bukan membuka chat 1-on-1 yang menyebut nama talent.
+- **Order terstruktur** — tombol order pada halaman talent membuka **form** (brand, jenis produk, tanggal shoot, budget, kebutuhan) yang dikirim ke grup admin sebagai pesan terstruktur — bukan membuka chat 1-on-1 yang menyebut nama talent.
 - **Database JSON** dengan export/import/restore manual (perintah owner) dan backup otomatis berkala, disimpan di Railway Volume.
 
 ## Kenapa desainnya seperti ini
 
-Katalog talent sengaja **tidak** menampilkan harga per-individu dengan tombol "chat langsung" yang otomatis membuka percakapan menyebut nama talent tertentu. Booking selalu melalui form terstruktur ke tim admin. Live chat tetap ada, tapi terpisah — untuk pertanyaan umum/support, bukan untuk memilih dan langsung menghubungi satu talent secara personal.
+Katalog talent sengaja **tidak** menampilkan harga per-individu dengan tombol "chat langsung" yang otomatis membuka percakapan menyebut nama talent tertentu. Order selalu melalui form terstruktur ke tim admin. Live chat tetap ada, tapi terpisah — untuk pertanyaan umum/support, bukan untuk memilih dan langsung menghubungi satu talent secara personal.
 
 ## Struktur proyek
 
@@ -71,7 +71,7 @@ npm start
 
 | Perintah | Fungsi |
 |---|---|
-| `/stats` | ringkasan pengguna, sesi, talent, booking |
+| `/stats` | ringkasan pengguna, sesi, talent, order |
 | `/exportdb` | kirim file database saat ini sebagai dokumen |
 | `/importdb` | reply ke file `.json` dengan perintah ini untuk mengganti database |
 | `/restoredb` | pilih dari daftar backup untuk dipulihkan |
@@ -83,15 +83,15 @@ npm start
 | `/setinfo <ads\|channel\|group\|sponsor> Judul \| Isi \| URL` | ubah halaman Info |
 | `/setbg <home\|talent\|info\|rules> <#hex atau URL gambar>` | ubah latar belakang halaman tersebut di Mini App |
 | `/resetbg <home\|talent\|info\|rules>` | kembalikan latar belakang halaman ke warna default |
-| `/bookings` | lihat booking terbaru |
+| `/orders` | lihat order terbaru |
 
 Backup otomatis berjalan tiap `AUTO_BACKUP_INTERVAL_MIN` menit (default 60), menyimpan maksimal `AUTO_BACKUP_KEEP` file terakhir (default 48) di `data/backups/`.
 
-## Alur booking (mini app)
+## Alur order (mini app)
 
 1. Pengguna membuka Mini App → tab **Talent** → tap kartu talent.
 2. Lembar detail menampilkan foto, deskripsi, dan **daftar paket** (bukan harga per orang untuk chat langsung).
-3. Tombol **Ajukan Booking** membuka form: nama brand, jenis produk, tanggal shoot, budget, kebutuhan.
+3. Tombol **Ajukan Order** membuka form: nama brand, jenis produk, tanggal shoot, budget, kebutuhan.
 4. Saat dikirim, form memanggil `POST /api/booking`, tersimpan ke database, dan pesan terstruktur otomatis dikirim ke grup admin untuk ditindaklanjuti.
 
 ## Alur live chat (bot)
