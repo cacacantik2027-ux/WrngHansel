@@ -11,7 +11,7 @@ function talentRoutes(store) {
         name: t.name,
         description: t.description,
         photo: t.photo,
-        packages: t.packages,
+        pricelist: t.pricelist,
       }))
     );
   });

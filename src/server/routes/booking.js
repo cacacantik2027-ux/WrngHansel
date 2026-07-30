@@ -1,5 +1,6 @@
 const express = require("express");
 const { nanoid } = require("nanoid");
+const { thinking, sendRich } = require("../../bot/rich");
 
 function bookingRoutes(store, bot, config) {
   const router = express.Router();
@@ -33,19 +34,21 @@ function bookingRoutes(store, bot, config) {
     await store.save();
 
     if (config.ADMIN_GROUP_ID && bot) {
-      const lines = [
-        "📋 Booking baru masuk",
-        `Brand: ${booking.brand}`,
-        `Jenis produk: ${booking.productType}`,
-        `Talent diminati: ${booking.talentName || "belum ditentukan"}`,
-        `Tanggal shoot: ${booking.shootDate}`,
-        `Budget: ${booking.budget}`,
-        `Kebutuhan: ${booking.needs}`,
-        booking.username ? `Kontak: @${booking.username}` : "Kontak: (tanpa username)",
-        `Ref: #${booking.id}`,
-      ];
+      const text = [
+        "# 📋 Order Baru Masuk",
+        "",
+        `- Brand: ${booking.brand}`,
+        `- Jenis produk: ${booking.productType}`,
+        `- Talent diminati: ${booking.talentName || "belum ditentukan"}`,
+        `- Tanggal shoot: ${booking.shootDate}`,
+        `- Budget: ${booking.budget}`,
+        `- Kebutuhan: ${booking.needs}`,
+        `- Kontak: ${booking.username ? `@${booking.username}` : "(tanpa username)"}`,
+        `- Ref: #${booking.id}`,
+      ].join("\n");
       try {
-        await bot.telegram.sendMessage(config.ADMIN_GROUP_ID, lines.join("\n"));
+        await thinking(bot.telegram, config.ADMIN_GROUP_ID);
+        await sendRich(bot.telegram, config.ADMIN_GROUP_ID, text);
       } catch (err) {
         console.error("[booking] failed to notify admin group:", err);
       }
