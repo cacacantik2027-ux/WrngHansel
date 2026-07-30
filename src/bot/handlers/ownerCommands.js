@@ -5,6 +5,7 @@ const {
   importFromBuffer,
 } = require("../../db/backup");
 const { userCount } = require("../userProfile");
+const { thinking, sendRich } = require("../rich");
 
 function isOwner(ctx, config) {
   return config.OWNER_ID && ctx.from && ctx.from.id === config.OWNER_ID;
@@ -23,13 +24,18 @@ function registerOwnerCommands(bot, store, config) {
   bot.command("stats", guard, async (ctx) => {
     const sessions = Object.values(store.data.sessions);
     const open = sessions.filter((s) => s.status === "open").length;
-    await ctx.reply(
+    await thinking(ctx.telegram, ctx.chat.id);
+    await sendRich(
+      ctx.telegram,
+      ctx.chat.id,
       [
-        `👥 Pengguna: ${userCount(store)}`,
-        `💬 Sesi aktif: ${open} / ${sessions.length} total`,
-        `🧑‍🎤 Talent: ${store.data.talents.length}`,
-        `📋 Booking masuk: ${store.data.bookings.length}`,
-        `🗄️ Backup terakhir: ${store.data.meta.lastBackupAt || "belum pernah"}`,
+        "# 📊 Statistik",
+        "",
+        `- 👥 Pengguna: ${userCount(store)}`,
+        `- 💬 Sesi aktif: ${open} / ${sessions.length} total`,
+        `- 🧑‍🎤 Talent: ${store.data.talents.length}`,
+        `- 📋 Order masuk: ${store.data.bookings.length}`,
+        `- 🗄️ Backup terakhir: ${store.data.meta.lastBackupAt || "belum pernah"}`,
       ].join("\n")
     );
   });
@@ -99,12 +105,12 @@ function registerOwnerCommands(bot, store, config) {
     await ctx.editMessageText(`✅ Database dipulihkan dari ${fileName}`);
   });
 
-  // ---- Bookings ----
+  // ---- Orders ----
 
-  bot.command("bookings", guard, async (ctx) => {
+  bot.command("orders", guard, async (ctx) => {
     const recent = store.data.bookings.slice(-10).reverse();
     if (recent.length === 0) {
-      await ctx.reply("Belum ada booking masuk.");
+      await ctx.reply("Belum ada order masuk.");
       return;
     }
     const lines = recent.map(
