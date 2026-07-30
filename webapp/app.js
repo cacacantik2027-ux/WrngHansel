@@ -12,6 +12,18 @@ const state = {
   botUsername: null,
   activeTalent: null,
   theme: {},
+  home: {
+    eyebrow: "Talent Hansel",
+    title: "Talent produk, siap untuk brand-mu.",
+    subtitle: "Jelajahi katalog talent kami, pilih paket yang sesuai, dan ajukan order langsung ke tim kami.",
+    tag: "Order terstruktur, respons cepat",
+    sectionTitle: "Jelajahi",
+    links: {
+      talent: { label: "Katalog Talent", sub: "Foto, deskripsi, dan paket harga" },
+      info: { label: "Info & Promo", sub: "Channel, grup, sponsor" },
+      rules: { label: "Aturan Order", sub: "Ketentuan yang perlu kamu tahu" },
+    },
+  },
 };
 
 const app = document.getElementById("app");
@@ -73,6 +85,16 @@ function openSupportChat() {
   else window.open(url, "_blank");
 }
 
+// Tapping "Ajukan Order" on a talent card sends the user straight into the
+// bot's chat, deep-linked with the talent's id so the bot (and admin) know
+// right away which talent the order is for.
+function openOrderChat(talentId) {
+  if (!state.botUsername) return;
+  const url = `https://t.me/${state.botUsername}?start=order_${talentId}`;
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url, "_blank");
+}
+
 function topbar(eyebrow) {
   return `
     <div class="topbar">
@@ -82,35 +104,37 @@ function topbar(eyebrow) {
 }
 
 function renderHome() {
+  const h = state.home;
+  const links = h.links || {};
   return `
-    ${topbar("Agensi Talent")}
+    ${topbar(h.eyebrow)}
     <div class="page">
       <div class="hero">
-        <h1>Talent produk, siap untuk brand-mu.</h1>
-        <p>Jelajahi katalog talent kami, pilih paket yang sesuai, dan ajukan booking langsung ke tim kami.</p>
-        <span class="tag">Booking terstruktur, respons cepat</span>
+        <h1>${h.title}</h1>
+        <p>${h.subtitle}</p>
+        <span class="tag">${h.tag}</span>
       </div>
-      <div class="section-title">Jelajahi</div>
+      <div class="section-title">${h.sectionTitle || "Jelajahi"}</div>
       <div class="home-links">
         <div class="home-link" onclick="navigate('talent')">
           <span class="num">01</span>
           <div>
-            <div class="label">Katalog Talent</div>
-            <div class="sub">Foto, deskripsi, dan paket harga</div>
+            <div class="label">${links.talent ? links.talent.label : "Katalog Talent"}</div>
+            <div class="sub">${links.talent ? links.talent.sub : ""}</div>
           </div>
         </div>
         <div class="home-link" onclick="navigate('info')">
           <span class="num">02</span>
           <div>
-            <div class="label">Info & Promo</div>
-            <div class="sub">Channel, grup, sponsor</div>
+            <div class="label">${links.info ? links.info.label : "Info & Promo"}</div>
+            <div class="sub">${links.info ? links.info.sub : ""}</div>
           </div>
         </div>
         <div class="home-link" onclick="navigate('rules')">
           <span class="num">03</span>
           <div>
-            <div class="label">Aturan Booking</div>
-            <div class="sub">Ketentuan yang perlu kamu tahu</div>
+            <div class="label">${links.rules ? links.rules.label : "Aturan Order"}</div>
+            <div class="sub">${links.rules ? links.rules.sub : ""}</div>
           </div>
         </div>
       </div>
@@ -123,16 +147,13 @@ function renderTalentGrid() {
   }
   const cards = state.talents
     .map((t, i) => {
-      const fromPrice = t.packages && t.packages.length
-        ? Math.min(...t.packages.map((p) => p.price))
-        : null;
       return `
         <div class="polaroid" onclick="openTalent('${t.id}')">
           <div class="tape"></div>
           <img src="${t.photo || ""}" alt="${t.name}" onerror="this.style.opacity=0.3" />
           <div class="name">${t.name}</div>
           <div class="desc">${t.description || ""}</div>
-          ${fromPrice ? `<div class="from-price">Mulai Rp ${fromPrice.toLocaleString("id-ID")}</div>` : ""}
+          ${t.pricelist ? `<div class="from-price">Lihat pricelist</div>` : ""}
         </div>`;
     })
     .join("");
@@ -219,6 +240,7 @@ window.navigate = function (page) {
   render();
 };
 window.openSupportChat = openSupportChat;
+window.openOrderChat = openOrderChat;
 
 window.openTalent = function (id) {
   const talent = state.talents.find((t) => t.id === id);
@@ -233,15 +255,7 @@ function renderTalentSheet(t) {
   overlay.onclick = (e) => {
     if (e.target === overlay) overlay.remove();
   };
-  const packages = (t.packages || [])
-    .map(
-      (p) => `
-      <div class="package-row">
-        <span class="pname">${p.name}</span>
-        <span class="pprice">Rp ${Number(p.price).toLocaleString("id-ID")}</span>
-      </div>`
-    )
-    .join("");
+  const pricelist = (t.pricelist || "").trim();
 
   overlay.innerHTML = `
     <div class="sheet">
@@ -249,75 +263,13 @@ function renderTalentSheet(t) {
       <img class="sheet-photo" src="${t.photo || ""}" alt="${t.name}" />
       <h2>${t.name}</h2>
       <div class="desc">${t.description || ""}</div>
-      <div class="section-title">Paket</div>
-      <div class="package-list">${packages || '<div class="empty-state">Belum ada paket.</div>'}</div>
-      <button class="btn-primary" onclick="openBookingForm('${t.id}')">Ajukan Booking</button>
+      <div class="section-title">Pricelist</div>
+      <div class="pricelist-text">${pricelist || '<div class="empty-state">Belum ada pricelist.</div>'}</div>
+      <button class="btn-primary" onclick="openOrderChat('${t.id}')">Ajukan Order</button>
     </div>`;
   document.body.appendChild(overlay);
   typewriter(overlay);
 }
-
-window.openBookingForm = function (talentId) {
-  document.querySelectorAll(".sheet-overlay").forEach((el) => el.remove());
-  const talent = state.talents.find((t) => t.id === talentId);
-  const overlay = document.createElement("div");
-  overlay.className = "sheet-overlay";
-  overlay.onclick = (e) => {
-    if (e.target === overlay) overlay.remove();
-  };
-  overlay.innerHTML = `
-    <div class="sheet">
-      <div class="grabber"></div>
-      <h2>Form Booking</h2>
-      <div class="desc">${talent ? `Untuk talent: ${talent.name}` : "Booking umum"}</div>
-      <form id="bookingForm">
-        <div class="form-field">
-          <label>Nama Brand</label>
-          <input name="brand" required placeholder="cth. Kopi Senja" />
-        </div>
-        <div class="form-field">
-          <label>Jenis Produk</label>
-          <input name="productType" required placeholder="cth. Kemasan kopi sachet" />
-        </div>
-        <div class="form-field">
-          <label>Tanggal Shoot (opsional)</label>
-          <input name="shootDate" placeholder="cth. 10 Agustus 2026" />
-        </div>
-        <div class="form-field">
-          <label>Budget (opsional)</label>
-          <input name="budget" placeholder="cth. Rp 2.000.000" />
-        </div>
-        <div class="form-field">
-          <label>Detail Kebutuhan</label>
-          <textarea name="needs" required placeholder="Ceritakan kebutuhan foto/video-mu..."></textarea>
-        </div>
-        <button type="submit" class="btn-primary">Kirim Booking</button>
-      </form>
-    </div>`;
-  document.body.appendChild(overlay);
-  typewriter(overlay);
-
-  document.getElementById("bookingForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = new FormData(e.target);
-    const payload = {
-      brand: form.get("brand"),
-      productType: form.get("productType"),
-      shootDate: form.get("shootDate"),
-      budget: form.get("budget"),
-      needs: form.get("needs"),
-      talentId: talent ? talent.id : null,
-      talentName: talent ? talent.name : null,
-    };
-    try {
-      await api("/api/booking", { method: "POST", body: JSON.stringify(payload) });
-      overlay.remove();
-      showToast("Booking terkirim! Admin akan segera menghubungi.");
-    } catch (err) {
-      showToast("Gagal mengirim booking. Coba lagi.");
-    }
-  });
-};
 
 function showToast(text) {
   const el = document.createElement("div");
@@ -331,18 +283,20 @@ function showToast(text) {
 async function bootstrap() {
   render(); // show shell immediately
   try {
-    const [talents, info, rules, cfg, theme] = await Promise.all([
+    const [talents, info, rules, cfg, theme, home] = await Promise.all([
       api("/api/talent"),
       api("/api/info"),
       api("/api/info/rules"),
       api("/api/config"),
       api("/api/theme"),
+      api("/api/home"),
     ]);
     state.talents = talents;
     state.info = info;
     state.rules = rules.rules;
     state.botUsername = cfg.botUsername;
     state.theme = theme;
+    state.home = home;
   } catch (err) {
     console.error("Failed to load initial data", err);
   }

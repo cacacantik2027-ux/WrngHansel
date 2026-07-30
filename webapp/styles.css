@@ -186,6 +186,7 @@ h1, h2, h3, .display {
   color: var(--ink-soft);
   margin-top: 3px;
   line-height: 1.4;
+  white-space: pre-line;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -233,21 +234,18 @@ h1, h2, h3, .display {
   margin-bottom: 14px;
 }
 .sheet h2 { font-size: 24px; }
-.sheet .desc { color: var(--ink-soft); font-size: 14px; margin: 8px 0 18px; line-height: 1.55; }
+.sheet .desc { color: var(--ink-soft); font-size: 14px; margin: 8px 0 18px; line-height: 1.55; white-space: pre-line; }
 
-.package-list { display: grid; gap: 8px; margin-bottom: 20px; }
-.package-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.pricelist-text {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 14px;
+  margin-bottom: 20px;
   font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-line;
 }
-.package-row .pname { font-weight: 500; }
-.package-row .pprice { color: var(--terracotta-deep); font-weight: 600; }
 
 .btn-primary {
   width: 100%;
@@ -263,7 +261,7 @@ h1, h2, h3, .display {
 }
 .btn-primary:active { background: var(--terracotta-deep); }
 
-/* ---- Booking form ---- */
+/* ---- Order form ---- */
 .form-field { margin-bottom: 14px; }
 .form-field label {
   display: block;
