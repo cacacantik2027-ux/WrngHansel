@@ -28,6 +28,10 @@ function createApp(store, bot, config) {
     res.json(store.data.settings.pageBackgrounds);
   });
 
+  app.get("/api/home", (req, res) => {
+    res.json(store.data.settings.home);
+  });
+
   // Serve the Mini App static files.
   const webappDir = path.join(__dirname, "..", "..", "webapp");
   app.use(express.static(webappDir));
